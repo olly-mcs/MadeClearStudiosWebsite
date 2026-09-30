@@ -10,3 +10,10 @@
   for = "/fonts/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# TESTING ONLY: tells search engines not to index any page while this site is used for testing.
+# Delete this block when the site launches on madeclearstudios.com.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

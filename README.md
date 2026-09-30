@@ -53,6 +53,7 @@ To add a case study or insight, copy an existing entry in the JSON file and give
 
 ## Search engines
 
+- **While testing, the whole site is hidden from search** by an `X-Robots-Tag: noindex` header in `netlify.toml`. Delete that block when the site launches on madeclearstudios.com.
 - `src/sitemap.njk` builds `/sitemap.xml` from every page plus the published case studies and insights. `src/robots.njk` builds `/robots.txt`. Both use the main address, `https://madeclearstudios.com` (`siteUrl` in `eleventy.config.js`).
 - To keep a page out of search and the sitemap, add `noindex: true` to its front matter and a `<meta name="robots" content="noindex">` tag to its head. The Sectors page is hidden like this until its copy is written.
 - Redirects live in `src/_redirects` (Netlify format). Add one whenever a page or CMS slug is renamed.
