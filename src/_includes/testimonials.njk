@@ -1,0 +1,21 @@
+{#- Client testimonials slider (Clients collection: testimonial, logo, person, role, company). -#}
+<div class="w-dyn-list">
+              <div role="list" class="flex gap-6 t_vertical t_gap-3 w-dyn-items">
+                {%- for client in clients | published %}{% if client.testimonial %}
+                <div role="listitem" class="testimonial-item w-dyn-item">
+                  <div class="max-w-440 height-100-pct margin-0-auto">
+                    <div class="flex vertical gap-4 t_gap-1-5 justify-space-between height-100-pct">
+                      <blockquote>{{ client.testimonial }}</blockquote>
+                      <figcaption class="flex vertical align-start text-align-left gap-2 t_gap-1-5">{% if client.logo %}<img loading="lazy" src="{{ client.logo }}" alt="{{ client.name }}" class="testimonial-img">{% endif %}
+                        <div>
+                          <div class="h3">{{ client.authorRoleLine1 }}</div>
+                          <div class="text-size-xsmall text-italicize-italic font-500">{{ client.authorRoleLine2 }}</div>
+                          <div class="text-size-xsmall text-italicize-italic font-500">{{ client.name }}</div>
+                        </div>
+                      </figcaption>
+                    </div>
+                  </div>
+                </div>
+                {%- endif %}{% endfor %}
+              </div>
+            </div>

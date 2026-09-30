@@ -1,0 +1,37 @@
+{#- Hidden list of KOL-featured case studies. The KOL Hub script moves each client's latest one into that client's panel, then removes this list. -#}
+<div class="case-studies-list-wrapper w-dyn-list">
+            <div role="list" class="case-studies-list w-dyn-items">
+              {%- for cs in caseStudies | published | where("featuredOnKolPage", true) | sortByOrder %}
+              {%- set client = clients | findBy("slug", cs.client) %}
+              <div role="listitem" class="padding-0-75 case-study-item w-dyn-item">
+                <div class="bg-light border-1 radius-0-25">
+                  <div class="padding-vertical padding-1-125">
+                    <div class="padding-horizontal padding-1-5 t_padding-1-25">
+                      <div class="grid _12-col gap-1-25 align-center t_flex t_vertical t_align-start">
+                        <div class="_2-col relative">{% if cs.coverPhoto %}<img src="{{ cs.coverPhoto }}" loading="lazy" alt="" class="_16x9 width-100-pct radius-0-25">{% endif %}
+                          <div class="overlay-wrapper"></div>
+                        </div>
+                        <div class="_6-col">
+                          <div class="flex vertical gap-2 height-100-pct justify-space-between t_gap-1-5">
+                            <div class="flex vertical gap-0-5">
+                              <h3 class="text-size-xsmall">{{ cs.title }}</h3>
+                              <p>{{ cs.overview }}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="_4-col flex justify-end">
+                          <a href="/case-study/{{ cs.slug }}" class="button primary w-inline-block">
+                            <div>Read Case Study</div>
+                            <div class="hover-button-blur"></div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="client-name">{{ client.name if client }}</p>
+                  <p class="publish-date">{{ cs.publishedOn }}</p>
+                </div>
+              </div>
+              {%- endfor %}
+            </div>
+          </div>

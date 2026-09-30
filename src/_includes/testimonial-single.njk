@@ -1,0 +1,21 @@
+{#- One-at-a-time client testimonial slider at the top of the KOL Hub pages. -#}
+<div class="w-dyn-list">
+              <div role="list" class="flex gap-6 t_vertical t_gap-3 overflow-hidden w-dyn-items">
+                {%- for client in clients | published %}{% if client.testimonial %}
+                <div role="listitem" class="testimonial-item min-width-100-pct flex justify-center w-dyn-item">
+                  <div class="max-w-440 margin-0-auto">
+                    <div class="flex vertical gap-4 t_gap-1-5 text-align-center align-center">
+                      <blockquote class="text-align-center">{{ client.testimonial }}</blockquote>
+                      <figcaption class="flex vertical align-center gap-2 t_gap-1-5">
+                        <div class="flex vertical align-center text-align-center">
+                          <div class="h3">{{ client.authorRoleLine1 }}</div>
+                          <div class="text-size-xsmall text-italicize-italic font-500">{{ client.authorRoleLine2 }}</div>
+                          <div class="text-size-xsmall text-italicize-italic font-500">{{ client.name }}</div>
+                        </div>{% if client.logo %}<img loading="lazy" src="{{ client.logo }}" alt="{{ client.name }}" class="testimonial-img">{% endif %}
+                      </figcaption>
+                    </div>
+                  </div>
+                </div>
+                {%- endif %}{% endfor %}
+              </div>
+            </div>

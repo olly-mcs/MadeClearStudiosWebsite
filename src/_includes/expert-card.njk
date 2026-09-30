@@ -1,0 +1,22 @@
+{#- One KOL card (Experts collection). Expects `expert`. -#}
+<div class="padding-1-5 border-1 radius-0-25 m_padding-1-25 height-100-pct flex vertical justify-space-between">
+                <div>
+                  <div class="width-100-pct _16x9 relative">{% if expert.photo %}<img src="{{ expert.photo }}" loading="lazy" alt="{{ expert.name }}" class="_16x9">{% endif %}
+                    <div class="overlay-wrapper"></div>
+                  </div>
+                  <div class="height-2"></div>
+                  <div class="flex vertical gap-0-75">
+                    <div class="h4">{{ expert.name }}</div>
+                    <div class="flex vertical gap-0-25">
+                      <div{{ ' class="w-dyn-bind-empty"' | safe if not expert.roleLine1 }}>{{ expert.roleLine1 }}</div>
+                      <div class="flex align-center gap-0-25">
+                        <div class="font-600 text-size-xsmall{{ ' w-dyn-bind-empty' if not expert.district }}">{{ expert.district }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex align-center gap-0-25">
+                  <div class="font-600 text-size-xsmall{{ ' w-dyn-bind-empty' if not expert.city }}">{{ expert.city }}</div>
+                  <div class="font-600 text-size-xsmall{{ ' w-dyn-bind-empty' if not expert.country }}">{{ expert.country }}</div>
+                </div>
+              </div>

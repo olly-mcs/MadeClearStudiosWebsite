@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Category one",
+    "slug": "category-one",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-12"
+  },
+  {
+    "name": "Category two",
+    "slug": "category-two",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-24"
+  },
+  {
+    "name": "Category three",
+    "slug": "category-three",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-24"
+  }
+]

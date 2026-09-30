@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Cardiology",
+    "slug": "cardiology",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-13",
+    "order": 1,
+    "description": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pretium leo sed pharetra cursus. Duis a enim ac velit tincidunt bibendum. Nulla scelerisque risus quis quam lacinia, ornare porttitor lacus pharetra. Sed sed libero lacinia, faucibus turpis sed, maximus lorem. Pellentesque auctor imperdiet lobortis. Integer blandit eros quis ipsum efficitur luctus. </p><p>Cras interdum at velit id iaculis. Maecenas odio orci, cursus ut finibus id, tempor sit amet arcu. Suspendisse sit amet metus ac arcu accumsan iaculis vel vitae nisi. Nam molestie nisl tortor, et fringilla nibh consequat efficitur. </p><p>Donec a ultricies augue. Nam et tellus interdum, tempus dolor at, dictum diam. Quisque fermentum pulvinar felis, et interdum nibh accumsan nec.</p>"
+  },
+  {
+    "name": "MedTech",
+    "slug": "medtech",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-13",
+    "order": 2,
+    "description": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pretium leo sed pharetra cursus. Duis a enim ac velit tincidunt bibendum. Nulla scelerisque risus quis quam lacinia, ornare porttitor lacus pharetra. Sed sed libero lacinia, faucibus turpis sed, maximus lorem. Pellentesque auctor imperdiet lobortis. Integer blandit eros quis ipsum efficitur luctus.</p><p>Cras interdum at velit id iaculis. Maecenas odio orci, cursus ut finibus id, tempor sit amet arcu. Suspendisse sit amet metus ac arcu accumsan iaculis vel vitae nisi. Nam molestie nisl tortor, et fringilla nibh consequat efficitur.</p><p>Donec a ultricies augue. Nam et tellus interdum, tempus dolor at, dictum diam. Quisque fermentum pulvinar felis, et interdum nibh accumsan nec.</p>"
+  },
+  {
+    "name": "Healthcare",
+    "slug": "healthcare",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-13",
+    "order": 3,
+    "description": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pretium leo sed pharetra cursus. Duis a enim ac velit tincidunt bibendum. Nulla scelerisque risus quis quam lacinia, ornare porttitor lacus pharetra. Sed sed libero lacinia, faucibus turpis sed, maximus lorem. Pellentesque auctor imperdiet lobortis. Integer blandit eros quis ipsum efficitur luctus. </p><p>Cras interdum at velit id iaculis. Maecenas odio orci, cursus ut finibus id, tempor sit amet arcu. Suspendisse sit amet metus ac arcu accumsan iaculis vel vitae nisi. Nam molestie nisl tortor, et fringilla nibh consequat efficitur. </p><p>Donec a ultricies augue. Nam et tellus interdum, tempus dolor at, dictum diam. Quisque fermentum pulvinar felis, et interdum nibh accumsan nec.</p>"
+  }
+]

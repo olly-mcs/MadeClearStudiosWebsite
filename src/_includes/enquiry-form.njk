@@ -1,0 +1,42 @@
+{#- "Make it clear" enquiry form, shown above the footer. Sent with Netlify Forms (form name "contact"), see js/contact-form.js. -#}
+<section class="section">
+          <div class="container">
+            <div class="grid _12-col t_flex t_vertical">
+              <div class="_3-col flex vertical justify-end relative padding-vertical t_padding-1-5 align-start m_padding-1-25">
+                <div class="relative">
+                  <div class="footer-text-highlight"><img loading="lazy" src="/images/Vector-5.svg" alt="" class="vector-bg"></div>
+                  <h2 class="relative">Make it clear</h2>
+                </div>
+                <div class="max-w-210">
+                  <p class="text-size-xsmall">Describe your cardiology challenge. We&#x27;ll respond with how we&#x27;d approach it.</p>
+                </div>
+                <div class="height-1-5 t_none"></div>
+                <div class="divider-vertical t_margin-negative"></div>
+              </div>
+              <div class="_9-col padding-1-5 t_padding-0">
+                <div class="margin-0 height-100-pct padding-vertical t_padding-1-5 m_padding-1-25 netlify-form">
+                  <form id="email-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="flex vertical gap-1-5 m_gap-1-25 height-100-pct">
+                    <input type="hidden" name="form-name" value="contact">
+                    <p class="hidden-field"><label>Leave this empty: <input name="bot-field"></label></p>
+                    <div><label for="First-name" class="form_label">First name*</label><input class="form_input w-input" maxlength="256" name="First-name" data-name="First name*" placeholder="First name" type="text" id="First-name" required=""></div>
+                    <div><label for="Last-name" class="form_label">Last name*</label><input class="form_input w-input" maxlength="256" name="Last-name" data-name="Last name*" placeholder="Last name" type="text" id="Last-name" required=""></div>
+                    <div><label for="Email" class="form_label">Email*</label><input class="form_input w-input" maxlength="256" name="Email" data-name="Email*" placeholder="Email" type="email" id="Email" required=""></div>
+                    <div><label for="Company-name" class="form_label">Company name*</label><input class="form_input w-input" maxlength="256" name="Company-name" data-name="Company name*" placeholder="Company name" type="text" id="Company-name" required=""></div>
+                    <div class="text-area-wrapper"><label for="Message" class="form_label">Message*</label><textarea id="Message" name="Message" maxlength="5000" data-name="Message" placeholder="Message" class="form_input is-text-area w-input"></textarea></div>
+                    <div class="flex">
+                      <div class="submit-wrapper"><input type="submit" data-wait="Please wait..." class="button primary w-button" value="Submit">
+                        <div class="hover-button-blur is-submit"></div>
+                      </div>
+                    </div>
+                  </form>
+                  <div class="w-form-done">
+                    <div>Thank you! Your submission has been received!</div>
+                  </div>
+                  <div class="w-form-fail">
+                    <div>Oops! Something went wrong while submitting the form.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>

@@ -1,0 +1,11 @@
+{#- A Vimeo video that opens in the Webflow lightbox. Expects `video` = { link, thumbnail, title }.
+    An empty video keeps its slot (hidden, with w-dyn-bind-empty) so the page script can lay out the rest. -#}
+<a href="#" class="lightbox-video _16x9 w-inline-block{{ ' w-lightbox' if video.link else ' w-dyn-bind-empty' }}">{% if video.link %}<img src="{{ video.thumbnail or 'https://d3e54v103j8qbb.cloudfront.net/plugins/Basic/assets/placeholder.60f9b1840c.svg' }}" loading="lazy" alt="{{ video.title }}" class="video-thumbnail">
+                <div class="absolute width-5 w-embed"><svg viewbox="0 0 1600 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M800 40C380.8 40 40 380.8 40 800C40 1219.2 380.8 1560 800 1560C1219.2 1560 1560 1219.2 1560 800C1560 380.8 1219.2 40 800 40ZM1044.8 838.4L686.4 1076.8C655.999 1097.6 614.4 1075.2 614.4 1038.4V561.599C614.4 524.796 655.999 502.401 686.4 523.197L1044.8 761.597C1072 779.196 1072 820.8 1044.8 838.4Z" fill="currentColor"></path>
+                  </svg></div>
+                <script type="application/json" class="w-json">{{ video.link | lightboxJson | safe }}</script>{% endif %}</a>
+{%- if video.title and video.link %}
+              <div class="height-1"></div>
+              <h3 class="h4">{{ video.title }}</h3>
+{%- endif %}

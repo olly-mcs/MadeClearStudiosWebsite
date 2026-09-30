@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Strategy",
+    "slug": "strategy",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-05",
+    "description": "<p>Science communicated without strategic clarity doesn't change behaviour, it just adds to the noise. Strategy, for us, means making sure every piece of content has a clear job to do in your audience's world. We work within your existing strategy, not around it. </p><p>But for clients who need it, we can also build campaign strategy from the ground up: audience insight, messaging frameworks, channel planning. All to make sure your audience and your content are aligned.</p>",
+    "order": 1
+  },
+  {
+    "name": "Creative",
+    "slug": "creative",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-05",
+    "description": "<p>Cardiologists, reps, administrators. They’re short on time, and overloaded with information.<br><br>We bring strategic clarity and creative storytelling together to make complex cardiology science not just understood but felt and remembered. Fast.</p>",
+    "order": 2
+  },
+  {
+    "name": "Production",
+    "slug": "production",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-05",
+    "description": "<p>High quality, reliable and compliant content creation, delivered on time, every time. We shoot everywhere from cath-labs to KOL offices, and are familiar with the rules on the ground at international congresses.<br><br>We understand the compliance requirements, the late-breaking trial deadlines, and the clinical sensitivities that make cardiology production different from any other sector. Clients tell us they feel completely comfortable handing us their clinical relationships, and that trust is carried across in the performances of the physicians.</p>",
+    "order": 3
+  },
+  {
+    "name": "Distribution",
+    "slug": "distribution",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-05-05",
+    "description": "<p>We understand how clinical knowledge travels in cardiology: through congresses, through peer networks, through the channels physicians actually trust. We help you plan distribution from the start, not as an afterthought, so the content we build together reaches the right clinicians at the right moment in their decision making.</p>",
+    "order": 4
+  }
+]

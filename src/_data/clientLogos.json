@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Boston Scientific",
+    "slug": "boston-scientific",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e26ccd150d5cee44dde7_image%2013.png",
+    "secondLine": false
+  },
+  {
+    "name": "Egg Medical",
+    "slug": "egg-medical",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e29fbc77e1741c2266b3_image%2014.png",
+    "secondLine": false
+  },
+  {
+    "name": "Jenavalve",
+    "slug": "jenavalve",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e2c0d3bfd0db49675285_image%2015.png",
+    "secondLine": false
+  },
+  {
+    "name": "HCA",
+    "slug": "hca",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e2e90639abc34caadfdc_image%2016.png",
+    "secondLine": false
+  },
+  {
+    "name": "Abbott",
+    "slug": "abbott",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e30789e0ec51df080af0_image%2027.png",
+    "secondLine": false
+  },
+  {
+    "name": "Shockwave",
+    "slug": "shockwave",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e331d9c736b9605513e5_image%2032.png",
+    "secondLine": true
+  },
+  {
+    "name": "Medtronic",
+    "slug": "medtronic",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e3555bb78751ae4bd62a_image%2017.png",
+    "secondLine": true
+  },
+  {
+    "name": "Optima",
+    "slug": "optima",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e38589e0ec51df081a97_image%2018.png",
+    "secondLine": true
+  },
+  {
+    "name": "Orsif",
+    "slug": "orsif",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e39ebddfd3e89024a80b_image%2019.png",
+    "secondLine": true
+  },
+  {
+    "name": "Philips",
+    "slug": "philips",
+    "archived": false,
+    "draft": false,
+    "publishedOn": "2026-04-10",
+    "logotype": "https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f61/69d8e3ba8d94f407c5a2b2bb_image%2020.png",
+    "secondLine": true
+  }
+]
