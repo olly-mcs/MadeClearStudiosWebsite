@@ -134,7 +134,7 @@
     "title": "Medtronic | HTN:RDN",
     "slug": "htn-rdn",
     "archived": false,
-    "draft": true,
+    "draft": false,
     "publishedOn": "2026-09-24",
     "order": 3,
     "overview": "Helping explain the benefits of Renal Denervation as an adjunctive therapy for treating Hypertension.",

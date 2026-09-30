@@ -211,9 +211,10 @@ https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css
                   <div class="padding-0-75 flex justify-space-between align-center c_client-accordion">
                     <div class="flex align-center gap-2-5 text-color-primary">
                       <h3 class="h4 client-main-name">{{ client.name }}</h3>
-                      <div class="flex gap-0-25 c_expert-coun-wrapper">
-                        <p class="experts-count">0</p>
-                        <p class="c_kol-text">KOLs</p>
+                      {%- set kolCount = (experts | published | whereIn("slug", client.experts)).length %}
+                      <div class="flex gap-0-25 c_expert-coun-wrapper"{% if not kolCount %} style="display: none"{% endif %}>
+                        <p class="experts-count">{{ kolCount }}</p>
+                        <p class="c_kol-text">{{ "KOL" if kolCount == 1 else "KOLs" }}</p>
                       </div>
                     </div>
                     <div class="width-1 client-accordion-arrow w-embed"><svg viewbox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -570,7 +571,7 @@ https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css
     const $clientList = $('.c_client-list');
     $('.c_client-item').each(function () {
       const $clientItem = $(this);
-      const expertCount = $clientItem.find('.c_expert-item').length;
+      const expertCount = $clientItem.find('.c_expert-item').length || parseInt($clientItem.find('.experts-count').first().text(), 10) || 0;
       const $countText = $clientItem.find('.experts-count').first();
       const $countWrapper = $clientItem.find('.c_expert-coun-wrapper').first();
       const $kolText = $clientItem.find('.c_kol-text').first();

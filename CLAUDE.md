@@ -51,6 +51,12 @@ Each Webflow collection is a JSON file in `src/_data/`, converted from the CSV e
 
 To add a case study or insight, copy an existing entry in the JSON file and give it a new `slug`.
 
+## Search engines
+
+- `src/sitemap.njk` builds `/sitemap.xml` from every page plus the published case studies and insights. `src/robots.njk` builds `/robots.txt`. Both use the main address, `https://madeclearstudios.com` (`siteUrl` in `eleventy.config.js`).
+- To keep a page out of search and the sitemap, add `noindex: true` to its front matter and a `<meta name="robots" content="noindex">` tag to its head. The Sectors page is hidden like this until its copy is written.
+- Redirects live in `src/_redirects` (Netlify format). Add one whenever a page or CMS slug is renamed.
+
 ## Contact form
 
 The enquiry form uses **Netlify Forms** (form name `contact`). Submissions appear in the Netlify dashboard under *Forms*.

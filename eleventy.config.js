@@ -3,6 +3,11 @@ export default function (eleventyConfig) {
   for (const dir of ["css", "js", "images", "fonts"]) {
     eleventyConfig.addPassthroughCopy(`src/${dir}`);
   }
+  eleventyConfig.addPassthroughCopy("src/_redirects");
+
+  // Used by the footer copyright line and the sitemap
+  eleventyConfig.addGlobalData("year", () => new Date().getFullYear());
+  eleventyConfig.addGlobalData("siteUrl", "https://madeclearstudios.com");
 
   // CMS helpers. The collections live in src/_data/*.json (exported from the Webflow CMS).
   // Items with "draft": true or "archived": true are left off the site, like in Webflow.

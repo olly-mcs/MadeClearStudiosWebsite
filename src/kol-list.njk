@@ -458,7 +458,7 @@ https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css
     const $clientList = $('.c_client-list');
     $('.c_client-item').each(function () {
       const $clientItem = $(this);
-      const expertCount = $clientItem.find('.c_expert-item').length;
+      const expertCount = $clientItem.find('.c_expert-item').length || parseInt($clientItem.find('.experts-count').first().text(), 10) || 0;
       const $countText = $clientItem.find('.experts-count').first();
       const $countWrapper = $clientItem.find('.c_expert-coun-wrapper').first();
       const $kolText = $clientItem.find('.c_kol-text').first();
