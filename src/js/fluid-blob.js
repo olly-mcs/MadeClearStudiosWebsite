@@ -1,6 +1,7 @@
 // Interactive liquid blob for the homepage hero.
 // Draws a ray-marched 3D blob in a WebGL shader on <canvas class="fluid-blob">:
 // the surface flows on its own, a droplet pulls towards the cursor, and clicks send a ripple across it.
+// The hero text and button (.blob-overlay) move and bend with it.
 // Add ?blob=classic to the URL to see the original image-based blob instead.
 // If WebGL isn't available, the static blob image underneath stays visible.
 (function () {
@@ -167,6 +168,7 @@
       canvas.height = h;
       gl.viewport(0, 0, w, h);
     }
+    pxPerUnit = rect.height / 2 / (VIEW * SCALE);
   }
   window.addEventListener("resize", resize);
 
@@ -224,6 +226,53 @@
   var energy = 0;
   var time = 0;
 
+  // --- The hero text and button sit "in" the water: they drift and squash with the blob's springs,
+  // and an SVG displacement filter bends them like a lens. They stay real text and a real link.
+  var overlay = reduceMotion ? null : document.querySelector(".blob-overlay");
+  var warp = null;
+  if (overlay) {
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
+    svg.style.position = "absolute";
+    svg.innerHTML =
+      '<filter id="blob-warp" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="noise"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>' +
+      "</filter>";
+    document.body.appendChild(svg);
+    warp = { turbulence: svg.querySelector("feTurbulence"), displace: svg.querySelector("feDisplacementMap") };
+    overlay.style.filter = "url(#blob-warp)";
+    overlay.style.willChange = "translate, rotate, scale";
+  }
+  var pxPerUnit = 0;
+
+  function moveOverlay() {
+    // How strongly recent clicks are still rippling
+    var kick = 0, wave = 0;
+    for (var r = 0; r < MAX_RIPPLES; r++) {
+      var age = time - ripples[r][3];
+      if (age > 0 && age < 2.5) {
+        kick += Math.exp(-age * 2.2);
+        wave += Math.sin(age * 16) * Math.exp(-age * 3);
+      }
+    }
+    var lean = dropR / 0.3; // 0..1, how far the droplet is pulled out
+    var x = (body.p[0] + drop.p[0] * 0.05 * lean) * pxPerUnit + Math.sin(time * 0.9) * 2;
+    var y = -(body.p[1] + drop.p[1] * 0.05 * lean) * pxPerUnit + Math.cos(time * 0.7) * 3 + wave * 5;
+    var vx = body.v[0], vy = body.v[1];
+    var sx = 1 + Math.max(-0.06, Math.min(0.08, Math.abs(vx) * 0.12 - Math.abs(vy) * 0.06)) + wave * 0.015;
+    var sy = 1 + Math.max(-0.06, Math.min(0.08, Math.abs(vy) * 0.12 - Math.abs(vx) * 0.06)) - wave * 0.015;
+    overlay.style.translate = x.toFixed(2) + "px " + y.toFixed(2) + "px";
+    overlay.style.rotate = (-vx * 5 + Math.sin(time * 0.5) * 0.6).toFixed(3) + "deg";
+    overlay.style.scale = sx.toFixed(4) + " " + sy.toFixed(4);
+    warp.displace.setAttribute("scale", (1.5 + energy * 10 + Math.min(kick, 1.5) * 16).toFixed(2));
+    warp.turbulence.setAttribute("baseFrequency",
+      (0.011 + 0.002 * Math.sin(time * 0.6)).toFixed(5) + " " + (0.017 + 0.003 * Math.cos(time * 0.45)).toFixed(5));
+  }
+
   // --- Animation loop, paused when the hero is off screen or the tab is hidden
   var visible = true;
   var running = false;
@@ -261,6 +310,7 @@
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (overlay) moveOverlay();
 
     if (!shownFallback) {
       // The live blob is drawing, so hide the static image underneath
