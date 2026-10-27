@@ -8,7 +8,7 @@
   if (!canvas || /[?&]blob=classic\b/.test(location.search)) return;
 
   var gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false });
-  if (!gl) return;
+  if (!gl) { console.warn("fluid-blob: WebGL not available, showing the static blob"); return; }
 
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var MAX_RIPPLES = 4;
@@ -50,7 +50,8 @@
     "    float age = t - uRipples[i].w;",
     "    if (age > 0.0 && age < 3.0) {",
     "      float dist = length(q - uRipples[i].xyz);",
-    "      float ring = exp(-pow((dist - age * 1.1) * 5.0, 2.0)) * exp(-age * 1.3);",
+    "      float front = (dist - age * 1.1) * 5.0;",
+    "      float ring = exp(-front * front) * exp(-age * 1.3);",
     "      d -= 0.07 * ring;",
     "      d += 0.09 * exp(-dist * dist * 10.0) * exp(-age * 4.0);",
     "    }",
@@ -130,7 +131,7 @@
   gl.attachShader(program, vs);
   gl.attachShader(program, fs);
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { console.warn("fluid-blob: " + gl.getProgramInfoLog(program)); return; }
   gl.useProgram(program);
 
   var buffer = gl.createBuffer();
@@ -255,6 +256,7 @@
       // The live blob is drawing, so hide the static image underneath
       shownFallback = true;
       canvas.classList.add("is-live");
+      console.info("fluid-blob: running");
       document.querySelectorAll(".water-bubble-img").forEach(function (img) { img.style.display = "none"; });
     }
 
