@@ -1,0 +1,403 @@
+<!-- Made Clear liquid lens: paste into Page settings > Custom code > Before </body> tag.
+     Then add the custom attribute data-blob-lens to the element that holds your hero copy. -->
+<script>
+/*!
+ * Made Clear liquid lens blob (trial B), standalone version for Webflow.
+ *
+ * Put the attribute data-blob-lens on any element (the "stage"). The script lays a WebGL water drop over it
+ * that magnifies and bends whatever is inside: text, buttons, boxes. The drop flows on its own, follows the
+ * cursor, pulls out a droplet, and ripples where you click.
+ *
+ * The stage's own content stays in the page, so it's still editable in Webflow, readable by screen readers
+ * and search engines, and its links stay clickable (the drop ignores the pointer).
+ * If the browser has no WebGL, nothing changes and the content shows as normal.
+ *
+ * Optional attributes on the stage:
+ *   data-blob-magnify="1.2"   how much the drop magnifies what's behind it
+ *   data-blob-background="#fff"   the colour behind the copy (default: found automatically)
+ *
+ * Note: Webflow doesn't run custom code inside the Designer. Check it on the published or staging site.
+ */
+(function () {
+  "use strict";
+  var MAX_RIPPLES = 4;
+  // The drop is drawn on a canvas 1.6x taller and 2.6x wider than the stage, so it can stretch towards the
+  // cursor without being cut off. VIEW is half the stage's height in blob units (the drop's radius is about 1).
+  var SCALE = 1.6, WIDE = 2.6, VIEW = 1.07;
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var vertexSource = "attribute vec2 aPos; void main() { gl_Position = vec4(aPos, 0.0, 1.0); }";
+
+  function fragmentSource(magnify) {
+    return [
+      "precision highp float;",
+      "#define SCALE " + SCALE.toFixed(2),
+      "#define VIEW " + VIEW.toFixed(2),
+      "#define MAGNIFY " + magnify.toFixed(3),
+      "uniform vec2 uRes;",
+      "uniform float uTime;",
+      "uniform float uEnergy;",
+      "uniform vec3 uOffset;",
+      "uniform vec3 uAttr;",
+      "uniform float uAttrR;",
+      "uniform vec4 uRipples[" + MAX_RIPPLES + "];",
+      "uniform float uBound;",
+      "uniform sampler2D uText;",
+
+      "float hash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }",
+      "float noise(vec3 x) {",
+      "  vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);",
+      "  return mix(mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),",
+      "             mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z) * 2.0 - 1.0;",
+      "}",
+      "float smin(float a, float b, float k) { float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0); return mix(b, a, h) - k * h * (1.0 - h); }",
+
+      "float map(vec3 p) {",
+      "  vec3 q = p - uOffset;",
+      "  float t = uTime;",
+      "  float n = noise(q * 1.15 + vec3(0.0, t * 0.13, t * 0.09)) * 0.6 + noise(q * 2.3 - vec3(t * 0.11, 0.0, t * 0.07)) * 0.25;",
+      "  float d = length(q * vec3(1.0, 1.08, 1.0)) - 1.0 - n * (0.16 + 0.08 * uEnergy);",
+      "  d += 0.022 * (1.0 + 1.5 * uEnergy) * sin(5.0 * q.x + t * 1.1) * sin(4.0 * q.y - t * 0.8) * sin(3.0 * q.z + t * 0.6);",
+      "  for (int i = 0; i < " + MAX_RIPPLES + "; i++) {",
+      "    float age = t - uRipples[i].w;",
+      "    if (age > 0.0 && age < 3.0) {",
+      "      float dist = length(q - uRipples[i].xyz);",
+      "      float front = (dist - age * 1.1) * 5.0;",
+      "      d -= 0.07 * exp(-front * front) * exp(-age * 1.3);",
+      "      d += 0.09 * exp(-dist * dist * 10.0) * exp(-age * 4.0);",
+      "    }",
+      "  }",
+      "  if (uAttrR > 0.001) d = smin(d, length(p - uAttr) - uAttrR, 0.5);",
+      "  return d;",
+      "}",
+
+      "vec3 calcNormal(vec3 p) {",
+      "  const vec2 k = vec2(1.0, -1.0); const float h = 0.0015;",
+      "  return normalize(k.xyy * map(p + k.xyy * h) + k.yyx * map(p + k.yyx * h) + k.yxy * map(p + k.yxy * h) + k.xxx * map(p + k.xxx * h));",
+      "}",
+
+      "float env(vec3 d) {",
+      "  float c = mix(0.55, 1.0, smoothstep(-0.6, 0.7, d.y));",
+      "  c -= 0.35 * exp(-abs(d.y + 0.08) * 7.0);",
+      "  c += 1.3 * smoothstep(0.9, 0.975, dot(d, normalize(vec3(0.55, 0.65, 0.55))));",
+      "  c += 0.8 * smoothstep(0.93, 0.985, dot(d, normalize(vec3(-0.7, 0.25, 0.65))));",
+      "  c += 0.55 * smoothstep(0.55, 1.0, sin(d.y * 9.0 + d.x * 2.5 + noise(d * 2.0) * 2.0));",
+      "  c -= 0.25 * smoothstep(0.6, 1.0, sin(d.x * 7.0 - d.y * 3.0 + noise(d * 2.5) * 2.5));",
+      "  c += 0.2 * noise(d * 4.0);",
+      "  return c;",
+      "}",
+
+      "void main() {",
+      "  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y * 2.0;",
+      "  vec3 ro = vec3(0.0, 0.0, 3.2);",
+      "  vec3 rd = normalize(vec3(uv * VIEW / 3.2 * SCALE, -1.0));",
+      "  float b = dot(ro, rd); float c = dot(ro, ro) - uBound * uBound; float hdisc = b * b - c;",
+      "  if (hdisc < 0.0) { gl_FragColor = vec4(0.0); return; }",
+      "  float t = max(-b - sqrt(hdisc), 0.0); float tEnd = -b + sqrt(hdisc);",
+      "  float minD = 1e3; bool hit = false;",
+      "  for (int i = 0; i < 72; i++) {",
+      "    vec3 p = ro + rd * t; float d = map(p);",
+      "    minD = min(minD, d);",
+      "    if (d < 0.0015) { hit = true; break; }",
+      "    t += d * 0.7;",
+      "    if (t > tEnd) break;",
+      "  }",
+      "  float px = 2.0 * VIEW * SCALE / uRes.y;",
+      "  if (!hit) { float a = 1.0 - smoothstep(0.0, px * 1.5, minD); gl_FragColor = vec4(vec3(0.82) * a, a); return; }",
+      "  vec3 p = ro + rd * t; vec3 n = calcNormal(p);",
+      "  vec3 w = p * 6.0 + vec3(0.0, uTime * 0.5, uTime * 0.3);",
+      "  n = normalize(n + 0.2 * vec3(noise(w), noise(w + 7.1), noise(w + 3.7)));",
+      "  float cosT = clamp(dot(n, -rd), 0.0, 1.0);",
+      "  float edge = 1.0 - cosT;",
+      "  float fres = 0.03 + 0.97 * pow(edge, 4.0);",
+      "  vec3 refl = reflect(rd, n); vec3 refr = refract(rd, n, 0.75);",
+      "  vec3 cp = p * 2.6 + refr * 0.8 + vec3(0.0, uTime * 0.35, uTime * 0.2);",
+      "  float caust = pow(1.0 - abs(noise(cp)), 10.0) + 0.6 * pow(1.0 - abs(noise(cp * 1.9 + 4.3)), 12.0);",
+      "  float spec = 1.3 * pow(max(dot(refl, normalize(vec3(0.5, 0.7, 0.5))), 0.0), 140.0)",
+      "             + 0.45 * pow(max(dot(refl, normalize(vec3(-0.6, 0.3, 0.7))), 0.0), 40.0);",
+      "  float lip = 0.5 * smoothstep(0.88, 0.98, edge) * (0.5 + 0.5 * noise(p * 6.0));",
+      // Look through the drop at the copy: magnified about the drop's centre, bent more towards the rim,
+      // with a slight colour fringe
+      "  vec2 asp = vec2(uRes.y / uRes.x, 1.0);",
+      "  vec2 suv = gl_FragCoord.xy / uRes;",
+      "  vec2 cuv = 0.5 + uOffset.xy / (VIEW * SCALE) * 0.5 * asp;",
+      "  vec2 look = cuv + (suv - cuv) / MAGNIFY;",
+      "  vec2 bend = -n.xy * asp * (0.02 + 0.1 * edge * edge);",
+      "  vec3 behind = vec3(texture2D(uText, look + bend).r, texture2D(uText, look + bend * 1.04).g, texture2D(uText, look + bend * 1.08).b);",
+      "  vec3 col = behind * mix(1.0, 0.82, smoothstep(0.6, 1.0, edge));",
+      "  col = mix(col, vec3(env(refl)), fres * 0.6);",
+      "  col *= mix(1.0, 0.55, smoothstep(0.8, 0.98, edge));",
+      "  col += 0.3 * caust + spec + lip;",
+      "  gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);",
+      "}",
+    ].join("\n");
+  }
+
+  function clamp(v, m) { return Math.max(-m, Math.min(m, v)); }
+  function isClear(colour) { return !colour || colour === "transparent" || /rgba\(.*,\s*0\)$/.test(colour); }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function createLens(stage) {
+    if (stage.__blobLens) return;
+    stage.__blobLens = true;
+    var magnify = parseFloat(stage.getAttribute("data-blob-magnify")) || 1.2;
+
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute("aria-hidden", "true");
+    canvas.className = "blob-lens-canvas";
+    // Centred on the stage, 2.6x wider and 1.6x taller than it, on top of the copy, ignoring the pointer
+    canvas.style.cssText =
+      "position:absolute;left:50%;top:50%;width:" + WIDE * 100 + "%;height:" + SCALE * 100 + "%;" +
+      "transform:translate(-50%,-50%);pointer-events:none;z-index:5;display:block;";
+    if (getComputedStyle(stage).position === "static") stage.style.position = "relative";
+
+    var gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false });
+    if (!gl) return;
+
+    function compile(type, source) {
+      var shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { console.warn("blob-lens: " + gl.getShaderInfoLog(shader)); return null; }
+      return shader;
+    }
+    var vs = compile(gl.VERTEX_SHADER, vertexSource);
+    var fs = compile(gl.FRAGMENT_SHADER, fragmentSource(magnify));
+    if (!vs || !fs) return;
+    var program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { console.warn("blob-lens: " + gl.getProgramInfoLog(program)); return; }
+    gl.useProgram(program);
+    stage.appendChild(canvas);
+
+    var buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    var aPos = gl.getAttribLocation(program, "aPos");
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    var u = {};
+    ["uRes", "uTime", "uEnergy", "uOffset", "uAttr", "uAttrR", "uRipples", "uBound", "uText"].forEach(function (name) {
+      u[name] = gl.getUniformLocation(program, name);
+    });
+
+    // --- The copy behind the drop, redrawn into a texture the shader can bend
+    var textCanvas = document.createElement("canvas");
+    var ctx = textCanvas.getContext("2d");
+    var texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.uniform1i(u.uText, 0);
+
+    var pageColor = stage.getAttribute("data-blob-background");
+    if (!pageColor) {
+      pageColor = "#ffffff";
+      for (var el = stage; el; el = el.parentElement) {
+        var bg = getComputedStyle(el).backgroundColor;
+        if (!isClear(bg)) { pageColor = bg; break; }
+      }
+    }
+
+    // Draws the stage's content where it sits on the page: boxes (buttons, panels) first, then every
+    // character at its own position, so fonts, line breaks and letter spacing match the real copy.
+    function drawCopy() {
+      var rect = canvas.getBoundingClientRect();
+      var W = canvas.width, H = canvas.height;
+      var sx = W / rect.width, sy = H / rect.height;
+      textCanvas.width = W;
+      textCanvas.height = H;
+      ctx.fillStyle = pageColor;
+      ctx.fillRect(0, 0, W, H);
+
+      [].slice.call(stage.querySelectorAll("*")).forEach(function (el) {
+        if (el === canvas) return;
+        var cs = getComputedStyle(el);
+        if (cs.display === "none" || cs.visibility === "hidden") return;
+        var hasBg = !isClear(cs.backgroundColor);
+        var border = parseFloat(cs.borderTopWidth) || 0;
+        if (!hasBg && !border) return;
+        var r = el.getBoundingClientRect();
+        roundRect(ctx, (r.left - rect.left) * sx, (r.top - rect.top) * sy, r.width * sx, r.height * sy, (parseFloat(cs.borderTopLeftRadius) || 0) * sx);
+        if (hasBg) { ctx.fillStyle = cs.backgroundColor; ctx.fill(); }
+        if (border) { ctx.lineWidth = border * sx; ctx.strokeStyle = cs.borderTopColor; ctx.stroke(); }
+      });
+
+      var walker = document.createTreeWalker(stage, NodeFilter.SHOW_TEXT);
+      var range = document.createRange();
+      for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+        var parent = node.parentElement;
+        if (!parent || parent.closest("script, style, noscript")) continue;
+        var cs = getComputedStyle(parent);
+        if (cs.visibility === "hidden" || cs.display === "none") continue;
+        var size = parseFloat(cs.fontSize) * sx;
+        ctx.font = cs.fontStyle + " " + cs.fontWeight + " " + size + "px " + cs.fontFamily;
+        ctx.fillStyle = cs.color;
+        ctx.textBaseline = "alphabetic";
+        var text = node.data;
+        for (var i = 0; i < text.length; i++) {
+          var ch = text[i];
+          if (/\s/.test(ch)) continue;
+          range.setStart(node, i);
+          range.setEnd(node, i + 1);
+          var rr = range.getClientRects()[0];
+          if (!rr) continue;
+          if (cs.textTransform === "uppercase") ch = ch.toUpperCase();
+          else if (cs.textTransform === "lowercase") ch = ch.toLowerCase();
+          var m = ctx.measureText(ch);
+          var asc = m.fontBoundingBoxAscent || size * 0.8;
+          var desc = m.fontBoundingBoxDescent || size * 0.2;
+          ctx.fillText(ch, (rr.left - rect.left) * sx, (rr.top - rect.top) * sy + (rr.height * sy - (asc + desc)) / 2 + asc);
+        }
+      }
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
+    }
+    var copyDirty = true;
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { copyDirty = true; });
+    window.addEventListener("resize", function () { copyDirty = true; });
+    // Redraw if the copy changes (for example Webflow interactions or a CMS bind)
+    if ("MutationObserver" in window) {
+      new MutationObserver(function () { copyDirty = true; }).observe(stage, { childList: true, subtree: true, characterData: true });
+    }
+
+    // --- Sizing: render below full device resolution, and lower it further if frames are slow
+    var quality = 1;
+    function resize() {
+      var rect = canvas.getBoundingClientRect();
+      var scale = Math.min(window.devicePixelRatio || 1, 1.5) * quality;
+      var w = Math.max(1, Math.round(rect.width * scale));
+      var h = Math.max(1, Math.round(rect.height * scale));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        gl.viewport(0, 0, w, h);
+        copyDirty = true;
+      }
+    }
+
+    // --- Pointer, in the drop's own units
+    var pointer = { x: 0, y: 0, active: false, speed: 0 };
+    var lastMove = null;
+    function toWorld(clientX, clientY) {
+      var rect = canvas.getBoundingClientRect();
+      var halfH = rect.height / 2;
+      return {
+        x: ((clientX - rect.left - rect.width / 2) / halfH) * VIEW * SCALE,
+        y: (-(clientY - rect.top - halfH) / halfH) * VIEW * SCALE,
+      };
+    }
+    window.addEventListener("pointermove", function (e) {
+      var w = toWorld(e.clientX, e.clientY);
+      var now = performance.now();
+      if (lastMove) pointer.speed = Math.min(Math.hypot(w.x - lastMove.x, w.y - lastMove.y) / (Math.max(now - lastMove.t, 1) / 1000), 12);
+      lastMove = { x: w.x, y: w.y, t: now };
+      pointer.x = w.x;
+      pointer.y = w.y;
+      pointer.active = true;
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () { pointer.active = false; });
+
+    var ripples = [];
+    for (var i = 0; i < MAX_RIPPLES; i++) ripples.push([0, 0, 0, -100]);
+    var nextRipple = 0;
+    window.addEventListener("pointerdown", function (e) {
+      var w = toWorld(e.clientX, e.clientY);
+      var dx = w.x - body.p[0], dy = w.y - body.p[1];
+      var r = Math.hypot(dx, dy);
+      if (r > 1.25) return;
+      var s = Math.min(r, 0.98);
+      var x = (dx / (r || 1)) * s, y = (dy / (r || 1)) * s;
+      ripples[nextRipple] = [x, y, Math.sqrt(Math.max(0, 1 - x * x - y * y)), time];
+      nextRipple = (nextRipple + 1) % MAX_RIPPLES;
+      energy = Math.min(energy + 0.6, 1.5);
+    }, { passive: true });
+
+    // --- Springs give the drop its jelly-like lag
+    function spring(s, target, dt, stiffness, damping) {
+      for (var k = 0; k < 3; k++) {
+        var a = (target[k] - s.p[k]) * stiffness - s.v[k] * damping;
+        s.v[k] += a * dt;
+        s.p[k] += s.v[k] * dt;
+      }
+    }
+    var drop = { p: [0, 0, 0.3], v: [0, 0, 0] };
+    var body = { p: [0, 0, 0], v: [0, 0, 0] };
+    var dropR = 0, energy = 0, time = 0;
+
+    // --- Animation loop, paused when off screen or the tab is hidden
+    var visible = true, running = false, last = 0, frameTimes = [];
+
+    function frame(now) {
+      if (!visible || document.hidden) { running = false; return; }
+      var dt = Math.min((now - (last || now)) / 1000, 1 / 30);
+      last = now;
+      time += dt * (reduceMotion ? 0.3 : 1);
+
+      var dist = Math.hypot(pointer.x / 1.6, pointer.y);
+      var pull = pointer.active && !reduceMotion ? Math.max(0, Math.min(1, (2.4 - dist) / 1.2)) : 0;
+      spring(drop, [clamp(pointer.x, 2.2), clamp(pointer.y, 1.4), 0.35], dt, 55, 9);
+      spring(body, [clamp(pointer.x * 0.4 * pull, 1.1), clamp(pointer.y * 0.4 * pull, 0.5), 0], dt, 18, 6);
+      dropR += (0.3 * pull - dropR) * Math.min(1, dt * 4);
+      pointer.speed *= Math.pow(0.02, dt);
+      energy += (Math.min(pointer.speed / 6, 1) * pull - energy) * Math.min(1, dt * 2);
+
+      resize();
+      if (copyDirty) { copyDirty = false; drawCopy(); }
+      gl.uniform2f(u.uRes, canvas.width, canvas.height);
+      gl.uniform1f(u.uTime, time);
+      gl.uniform1f(u.uEnergy, energy);
+      gl.uniform3fv(u.uOffset, body.p);
+      gl.uniform3fv(u.uAttr, drop.p);
+      gl.uniform1f(u.uAttrR, dropR);
+      gl.uniform4fv(u.uRipples, [].concat.apply([], ripples));
+      gl.uniform1f(u.uBound, Math.max(1.4 + Math.hypot(body.p[0], body.p[1]), Math.hypot(drop.p[0], drop.p[1], drop.p[2]) + dropR + 0.45));
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      frameTimes.push(dt);
+      if (frameTimes.length === 40) {
+        var avg = frameTimes.reduce(function (a, b) { return a + b; }, 0) / frameTimes.length;
+        if (avg > 1 / 40 && quality > 0.55) quality = Math.max(0.55, quality - 0.15);
+        frameTimes = [];
+      }
+      requestAnimationFrame(frame);
+    }
+    function start() {
+      if (running) return;
+      running = true;
+      last = 0;
+      requestAnimationFrame(frame);
+    }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) start();
+      }).observe(stage);
+    }
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) start(); });
+    start();
+  }
+
+  function init() { document.querySelectorAll("[data-blob-lens]").forEach(createLens); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
