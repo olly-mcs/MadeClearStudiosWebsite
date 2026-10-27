@@ -24,6 +24,7 @@ npm run build    # production build into _site/
 | Insight page design (`/insights/...`) | `src/insight.njk` |
 | Pages | `src/index.njk`, `about.njk`, `services.njk`, `case-studies.njk`, `kol.njk`, `kol-list.njk`, `insights.njk`, `contact.njk`, `sectors.njk`, `terms-conditions.njk`, `privacy-policy.njk`, `womenasone.njk`, `404.njk` |
 | Terms & Conditions and Privacy Policy text (clause numbers are written out, so update cross-references by hand if clauses move) | `src/_includes/legal/terms.njk`, `src/_includes/legal/privacy.njk` |
+| Homepage liquid blob (WebGL shader; add `?blob=classic` to the URL to see the original) | `src/js/fluid-blob.js`, sizing in `src/css/site.css` |
 | Webflow's site-wide custom CSS embed | `src/_includes/global-styles.njk` |
 | Styles | `src/css/made-clear-wip.webflow.css` (Webflow export), `src/css/site.css` (our additions) |
 | Images and fonts | `src/images/`, `src/fonts/` |
