@@ -136,9 +136,9 @@
   }
 }
 
-/* Homepage liquid blob (js/fluid-blob.js): drawn 1.6x larger than its layout box so it can stretch
-   towards the cursor without being cut off. The SCALE in the script must match. */
+/* Homepage liquid blob (js/fluid-blob.js): drawn larger than its layout box (2.6x wider, 1.6x taller)
+   so it can stretch towards the cursor without being cut off. The SCALE in the script must match the 1.6. */
 .water-bubble.fluid-blob {
-  scale: 1.6; /* separate from `transform`, which Webflow's interactions set inline */
+  scale: 2.6 1.6; /* separate from `transform`, which Webflow's interactions set inline */
   pointer-events: none;
 }

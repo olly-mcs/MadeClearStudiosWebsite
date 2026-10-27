@@ -12,7 +12,8 @@
 
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var MAX_RIPPLES = 4;
-  // The canvas is drawn 1.6x larger than its layout box (see site.css) so the blob can stretch without being cut off
+  // The canvas is drawn larger than its layout box (see site.css): 1.6x taller and 2.6x wider,
+  // so the blob can stretch, and the droplet travel sideways, without being cut off. SCALE is the vertical factor.
   var SCALE = 1.6;
   // Half the height of the layout box, in blob units (the blob's radius is about 1)
   var VIEW = 1.07;
@@ -96,21 +97,29 @@
     "  float px = 2.0 * VIEW * SCALE / uRes.y;",
     "  if (!hit) { float a = 1.0 - smoothstep(0.0, px * 1.5, minD); gl_FragColor = vec4(vec3(0.82) * a, a); return; }",
     "  vec3 p = ro + rd * t; vec3 n = calcNormal(p);",
-    "  vec3 w = p * 5.0 + vec3(0.0, uTime * 0.25, uTime * 0.15);",
-    "  n = normalize(n + 0.22 * vec3(noise(w), noise(w + 7.1), noise(w + 3.7)));",
+    // Quick, fine ripples on the surface: this is what makes it read as water
+    "  vec3 w = p * 6.0 + vec3(0.0, uTime * 0.5, uTime * 0.3);",
+    "  n = normalize(n + 0.2 * vec3(noise(w), noise(w + 7.1), noise(w + 3.7)));",
     "  float cosT = clamp(dot(n, -rd), 0.0, 1.0);",
-    "  float fres = 0.04 + 0.96 * pow(1.0 - cosT, 5.0);",
-    "  vec3 refl = reflect(rd, n); vec3 refr = refract(rd, n, 0.75);",
-    // Seen through the glass: mostly the white page, with soft milky streaks from the surface flow
-    "  float through = 0.86 + 0.12 * env(refr) - 0.12 * max(noise(n * 2.5 + vec3(0.0, uTime * 0.05, 0.0)), 0.0);",
-    "  float col = mix(through, env(refl), fres);",
     "  float edge = 1.0 - cosT;",
-    "  col *= mix(1.0, 0.35, smoothstep(0.55, 0.95, edge));",            // darker rim, as in the photo
-    "  col += 0.6 * smoothstep(0.86, 0.97, edge) * (0.5 + 0.5 * noise(p * 6.0));",   // bright glassy lip at the very edge
-    "  col += 1.2 * pow(max(dot(refl, normalize(vec3(0.5, 0.7, 0.5))), 0.0), 120.0);", // sharp highlight
-    "  col += 0.35 * pow(max(dot(refl, normalize(vec3(-0.6, 0.3, 0.7))), 0.0), 30.0);",
+    "  float fres = 0.03 + 0.97 * pow(edge, 4.0);",
+    "  vec3 refl = reflect(rd, n); vec3 refr = refract(rd, n, 0.75);",
+    // Caustics: thin bright lines of light that shimmer through the water
+    "  vec3 cp = p * 2.6 + refr * 0.8 + vec3(0.0, uTime * 0.35, uTime * 0.2);",
+    "  float caust = pow(1.0 - abs(noise(cp)), 10.0) + 0.6 * pow(1.0 - abs(noise(cp * 1.9 + 4.3)), 12.0);",
+    // Light bent through the body: soft grey streaks from the studio around it
+    "  float through = 0.78 + 0.22 * env(refr);",
+    "  float spec = 1.3 * pow(max(dot(refl, normalize(vec3(0.5, 0.7, 0.5))), 0.0), 140.0)",
+    "             + 0.45 * pow(max(dot(refl, normalize(vec3(-0.6, 0.3, 0.7))), 0.0), 40.0);",
+    "  float col = mix(through, env(refl), fres);",
+    "  col *= mix(1.0, 0.45, smoothstep(0.7, 0.97, edge));",               // thin darker line at the rim
+    "  col += 0.5 * smoothstep(0.88, 0.98, edge) * (0.5 + 0.5 * noise(p * 6.0));", // bright lip at the very edge
+    "  col += 0.5 * caust + spec;",
     "  col = clamp(col, 0.0, 1.0);",
-    "  gl_FragColor = vec4(vec3(col), 1.0);",
+    // Translucent: the centre is mostly see-through, the rim, reflections and highlights are solid
+    "  float alpha = 0.22 + 0.7 * smoothstep(0.3, 0.95, edge) + 0.6 * fres + 0.35 * caust + spec;",
+    "  alpha = clamp(alpha, 0.0, 1.0);",
+    "  gl_FragColor = vec4(vec3(col) * alpha, alpha);",
     "}",
   ].join("\n");
 
@@ -229,10 +238,11 @@
     time += dt * (reduceMotion ? 0.3 : 1);
 
     // Pull the droplet towards the cursor when it's near the blob; it shrinks away as the cursor leaves.
-    var dist = Math.hypot(pointer.x, pointer.y);
+    // The frame is wider than it is tall, so the droplet can follow the cursor further sideways
+    var dist = Math.hypot(pointer.x / 1.6, pointer.y);
     var pull = pointer.active && !reduceMotion ? Math.max(0, Math.min(1, (2.4 - dist) / 1.2)) : 0;
-    var reach = Math.min(dist, 1.7) / (dist || 1);
-    spring(drop, [pointer.x * reach, pointer.y * reach, 0.35], dt, 55, 9);
+    var clamp = function (v, m) { return Math.max(-m, Math.min(m, v)); };
+    spring(drop, [clamp(pointer.x, 2.2), clamp(pointer.y, 1.4), 0.35], dt, 55, 9);
     spring(body, [pointer.x * 0.07 * pull, pointer.y * 0.07 * pull, 0], dt, 30, 7);
     dropR += (0.3 * pull - dropR) * Math.min(1, dt * 4);
 
