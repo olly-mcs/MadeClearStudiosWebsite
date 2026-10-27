@@ -92,6 +92,23 @@ https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css
               </div>
             </div>
           </div>
+          {#- Trial B: the blob passes over the copy and magnifies it (js/fluid-blob.js, lens mode). Remove once a version is chosen. -#}
+          <div class="blob-trial-label">Trial B: the water passes over the copy</div>
+          <div class="c_hero-height">
+            <div class="flex justify-center align-center m_width-100-pct relative">
+              <div class="water-bubble-placeholder blob-lens-stage"><img src="/images/hi-res-blob-p-1080.avif" loading="lazy" alt="" class="cover water-bubble-img"><canvas class="water-bubble fluid-blob fluid-blob-lens" data-blob-mode="lens" aria-hidden="true"></canvas></div>
+              <div class="absolute z-1 blob-lens-copy">
+                <div class="max-width-360">
+                  <div class="flex vertical align-center text-align-center gap-1-25">
+                    <p class="text-size-normal">When your science can change lives, your content should change behaviour.</p>
+                    <a href="/contact" class="button primary w-inline-block">
+                      <div>Work With Us</div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="height-5"></div>
           <div class="height-1"></div>
           <div class="flex vertical align-center text-align-center gap-0-75">
@@ -295,7 +312,7 @@ https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css
     /* Testimonials Slider END */
     /* Do not add anything below this code */
     // The main blob is drawn by js/fluid-blob.js, unless ?blob=classic asks for the original
-    const canvases = document.querySelectorAll(/[?&]blob=classic\b/.test(location.search) ? '.water-bubble' : '.water-bubble:not(.fluid-blob)');
+    const canvases = document.querySelectorAll(/[?&]blob=classic\b/.test(location.search) ? '.water-bubble:not(.fluid-blob-lens)' : '.water-bubble:not(.fluid-blob)');
     if (canvases.length) {
       const imageUrls = {
         'bubble-img-1': 'https://cdn.prod.website-files.com/69d7a9d5d387ff8d4be61f60/69dce65c7c01004820066763_hi%20res%20blob.avif',

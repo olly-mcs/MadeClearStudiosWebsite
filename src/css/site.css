@@ -142,3 +142,31 @@
   scale: 2.6 1.6; /* separate from `transform`, which Webflow's interactions set inline */
   pointer-events: none;
 }
+
+/* Trial B of the homepage blob: the water sits over the copy and magnifies it. The canvas is above the
+   copy (which stays in the page for screen readers) and ignores the pointer, so the button still works. */
+.blob-lens-stage {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.water-bubble.fluid-blob-lens {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.blob-trial-label {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* Keep trial B's copy inside the drop, so the magnified lines don't run into the rim */
+.blob-lens-copy .max-width-360 {
+  max-width: min(18rem, 60vw);
+}
